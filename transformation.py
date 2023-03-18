@@ -1,9 +1,15 @@
-import ffmpeg
+import ffmpy
 import whisper
 import os
 import math
 import moviepy.editor as mp
 import datetime
+import time
+
+
+
+import docx
+
 
 
 class Transformations:
@@ -22,15 +28,37 @@ class Transformations:
         segments = result["segments"]
         subs_file = f'{audio.replace(".mp3" , "")}.srt'
         return [segments, subs_file]
+    
+    @staticmethod
+    def str_to_docx(output_filename, language):
+        with open(output_filename, 'r', encoding='utf-8') as f:
+            text = f.read()
+
+        # Create a new .docx file and add a paragraph for each line in the .txt file
+        doc = docx.Document()
+        for line in text.split('\n'):
+            doc.add_paragraph(line)
+
+        # Save the .docx file
+        doc.save(f'{output_filename.replace(".srt" , "")}_{language}.docx')
+        output_filename = f'{output_filename.replace(".srt" , "")}_{language}.docx'
+        return output_filename
+    
+    def docx_to_str(output_filename):
+        doc = docx.Document(output_filename)
+
+        with open(f'{output_filename.replace(".docx" , "")}.srt', 'w', encoding='utf-8') as f:
+            for para in doc.paragraphs:
+                f.write(para.text)
+                f.write('\n')
 
     @staticmethod
-    def text_translate(segments: dict, language: str): #########################change
-        return segments
+    def text_translate(output_filename, language): #########################change
+        output_filename = Transformations.str_to_docx(output_filename, language)
+        Transformations.docx_to_str(output_filename)
     
     @staticmethod
     def create_srt_file(data, output_filename, language):
-        if language != 'english':
-            data = Transformations.text_translate(data, language)
 
         with open(output_filename, 'w', encoding='utf-8') as f:
             for i, item in enumerate(data):
@@ -42,8 +70,10 @@ class Transformations:
                 f.write(start_srt + ' --> ' + end_srt + '\n')
                 f.write(item['text'] + '\n')
                 f.write('\n')
+        
+        if language != 'english':
+            Transformations.text_translate(output_filename, language)
 
-    
     @staticmethod
     def start_to_srt(start):
         hours, remainder = divmod(start.seconds, 3600)
@@ -59,34 +89,21 @@ class Transformations:
     @staticmethod
     def embedd(video_file: str, subs_files: dict):
         
-        #Define input values
-        input_ffmpeg = ffmpeg.input(video_file)
-        input_subs = []
-        metadata = {}
-        i = 0
-        for k in subs_files.keys():
-            input_subs.append(ffmpeg.input(subs_files[k])['s'])
-            metadata = {**metadata, **{f'metadata:s:s:{i}': f'title={k}'}}
+        output_file = f'{video_file.replace(".mkv" , "")}_subs.mkv'
 
-        #Define output file
-        input_video = input_ffmpeg['v']
-        input_audio = input_ffmpeg['a']
+        inputs = {video_file: None}
+        outputs = {output_file: '-y -c copy -map 0:v -map 0:a '}
+        
+        i=0
+        for dubs, address in subs_files.items():
+            inputs[address] = None
+            outputs[output_file] += f'-map {i+1}:s:0 -metadata:s:s:{i} language={dubs} -metadata:s:s:{i} title={dubs} '
+            i += 1
+        
 
-        input = [input_video, input_audio] + input_subs
-        output_ffmpeg = ffmpeg.output(
-            *input,
-            vcodec='copy', acodec='copy',
-            **metadata
-        )
+        ff = ffmpy.FFmpeg(inputs=inputs, outputs=outputs)
 
-        # If the destination file already exists, overwrite it.
-        output_ffmpeg = ffmpeg.overwrite_output(output_ffmpeg)
-
-        # Print the equivalent ffmpeg command we could run to perform the same action as above.
-        print(ffmpeg.compile(output_ffmpeg))
-
-        # Do it! transcode!
-        ffmpeg.run(output_ffmpeg)
+        ff.run()
         return
     
     @staticmethod
@@ -97,9 +114,12 @@ class Transformations:
 
         subs_files = {}
         for language in getattr(parser.parse_known_args()[0], "subs"):
+            address = f'{audio.replace(".mp3" , "")}_{language}.srt'
             #address = f'{language}_'+subs_file
-            address = subs_file
+            #address = subs_file
+            print(subs_files)
             subs_files = {**subs_files, **{language: address}}
+            print(subs_files)
             Transformations.create_srt_file(segments, address, language)
         
         Transformations.embedd(video, subs_files)
