@@ -5,7 +5,7 @@ import math
 import moviepy.editor as mp
 import datetime
 import time
-
+import translations
 
 
 import docx
@@ -40,8 +40,8 @@ class Transformations:
             doc.add_paragraph(line)
 
         # Save the .docx file
-        doc.save(f'{output_filename.replace(".srt" , "")}_{language}.docx')
-        output_filename = f'{output_filename.replace(".srt" , "")}_{language}.docx'
+        doc.save(output_filename.replace(".srt" , ".docx"))
+        output_filename = output_filename.replace(".srt" , ".docx")
         return output_filename
     
     def docx_to_str(output_filename):
@@ -55,10 +55,13 @@ class Transformations:
     @staticmethod
     def text_translate(output_filename, language): #########################change
         output_filename = Transformations.str_to_docx(output_filename, language)
+        translations.translate(output_filename[:output_filename.rfind('/')])
         Transformations.docx_to_str(output_filename)
     
     @staticmethod
     def create_srt_file(data, output_filename, language):
+
+        print(language)
 
         with open(output_filename, 'w', encoding='utf-8') as f:
             for i, item in enumerate(data):
@@ -117,7 +120,6 @@ class Transformations:
             address = f'{audio.replace(".mp3" , "")}_{language}.srt'
             #address = f'{language}_'+subs_file
             #address = subs_file
-            print(subs_files)
             subs_files = {**subs_files, **{language: address}}
             print(subs_files)
             Transformations.create_srt_file(segments, address, language)
