@@ -47,16 +47,22 @@ class Transformations:
     def docx_to_str(output_filename):
         doc = docx.Document(output_filename)
 
-        with open(f'{output_filename.replace(".docx" , "")}.srt', 'w', encoding='utf-8') as f:
+        with open(f'{output_filename.replace(" es.docx" , "")}.srt', 'w', encoding='utf-8') as f:
             for para in doc.paragraphs:
                 f.write(para.text)
                 f.write('\n')
+    
+    def delete_docx(output_filename):
+        os.remove(output_filename)
+        os.remove(output_filename.replace(" es.docx" , ".docx"))
 
     @staticmethod
     def text_translate(output_filename, language): #########################change
         output_filename = Transformations.str_to_docx(output_filename, language)
-        translations.translate(output_filename[:output_filename.rfind('/')])
+        output_filename = translations.translate(output_filename)
+        #output_filename = "G:\\1)Descargas\\Universidad Nacional De Bogota\\ICS\\8. Ascent II\\4. Shoot Examples\\Nueva carpeta\\4.1 Biology 1/Biology 1_spanish es.docx"
         Transformations.docx_to_str(output_filename)
+        Transformations.delete_docx(output_filename)
     
     @staticmethod
     def create_srt_file(data, output_filename, language):
