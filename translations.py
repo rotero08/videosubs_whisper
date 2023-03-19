@@ -68,7 +68,9 @@ def translate(output_filename):
         except TimeoutException:
             driver.quit() # If the element is not found, refresh the page and try again
 
+        
         except Exception as e:
             driver.quit()
+        
 
     return output_filename

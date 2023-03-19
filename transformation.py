@@ -59,12 +59,11 @@ class Transformations:
         os.remove(output_filename.replace(" es.docx" , ".docx"))
 
     @staticmethod
-    def text_translate(output_filename, language): #########################change
-        #output_filename = Transformations.str_to_docx(output_filename, language)
-        #output_filename = translations.translate(output_filename)
-        #output_filename = "G:\\1)Descargas\\Universidad Nacional De Bogota\\ICS\\8. Ascent II\\4. Shoot Examples\\Nueva carpeta\\asd\\Biology 1_spanish.docx"
-        #Transformations.docx_to_str(output_filename)
-        #Transformations.delete_docx(output_filename)
+    def text_translate(output_filename, language):
+        output_filename = Transformations.str_to_docx(output_filename, language)
+        output_filename = translations.translate(output_filename)
+        Transformations.docx_to_str(output_filename)
+        Transformations.delete_docx(output_filename)
         return
     
     @staticmethod
