@@ -5,8 +5,8 @@ import math
 import moviepy.editor as mp
 import datetime
 import translations
-
-
+import subprocess
+import time
 import docx
 
 
@@ -44,6 +44,7 @@ class Transformations:
         output_filename = output_filename.replace(".srt" , ".docx")
         return output_filename
     
+    @staticmethod
     def docx_to_str(output_filename):
         doc = docx.Document(output_filename)
 
@@ -52,6 +53,7 @@ class Transformations:
                 f.write(para.text)
                 f.write('\n')
     
+    @staticmethod
     def delete_docx(output_filename):
         os.remove(output_filename)
         os.remove(output_filename.replace(" es.docx" , ".docx"))
@@ -67,8 +69,6 @@ class Transformations:
     
     @staticmethod
     def create_srt_file(data, output_filename, language):
-
-        print(language)
 
         with open(output_filename, 'w', encoding='utf-8') as f:
             for i, item in enumerate(data):
@@ -98,7 +98,6 @@ class Transformations:
     
     @staticmethod
     def embedd(video_file: str, subs_files: dict):
-
         root_ext = os.path.splitext(video_file)
         output_file = f'{video_file.replace(root_ext[1] , "")}_subs.mkv'
 
@@ -110,22 +109,24 @@ class Transformations:
             inputs[address] = None
             outputs[output_file] += f'-map {i+1}:s:0 -metadata:s:s:{i} language={dubs[:min(len(dubs), 3)]} -metadata:s:s:{i} title={dubs} '
             i += 1
-        
-
+            
+        print(inputs, outputs)
         ff = ffmpy.FFmpeg(inputs=inputs, outputs=outputs)
-
+        
         ff.run()
         return
     
+    @staticmethod
     def delete_srt(subs_files):
         for file in subs_files.values():
             os.remove(file)
 
-    def overwrite_video(root_ext):
-        return
-    
-    def delete_video():
-        os.remove()
+    @staticmethod
+    def overwrite_video(video):
+        os.remove(video)
+        root_ext = os.path.splitext(video)
+        video = video.replace(root_ext[1], "_subs.mkv")
+        os.rename(video, video.replace("_subs.mkv", ".mkv"))
     
     @staticmethod
     def process_video(parser, video):
@@ -136,16 +137,17 @@ class Transformations:
         subs_files = {}
         for language in getattr(parser.parse_known_args()[0], "subs"):
             address = f'{audio.replace(".mp3" , "")}_{language}.srt'
-            #address = f'{language}_'+subs_file
-            #address = subs_file
             subs_files = {**subs_files, **{language: address}}
-            print(subs_files)
             Transformations.create_srt_file(segments, address, language)
-        
-        if (parser.parse_args().overwrite):
-            Transformations.overwrite_video()
         
         Transformations.embedd(video, subs_files)
         
-        if (parser.parse_args().delete):
+        args = parser.parse_args()
+
+        if args.overwrite:
+            args.delete = True
+        
+        if (args.delete):
             Transformations.delete_srt(subs_files)
+
+

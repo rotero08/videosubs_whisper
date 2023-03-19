@@ -70,9 +70,11 @@ class MainContainer:
         for (dir, _ , file_names) in walk(dir):
             self.videos += list(map(lambda file: dir+ "/" + file if any(file.endswith(ext) for ext in DEFAULT.video_types) else '', file_names))
             self.videos = list(filter(('').__ne__, self.videos))
-
-        print(self.videos)
         
         for video in self.videos:
             tp.process_video(self.parser, video)
+
+        for video in self.videos:
+            if (self.parser.parse_args().overwrite):
+                tp.overwrite_video(video)
         return
