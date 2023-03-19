@@ -5,6 +5,7 @@ from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchWindowException
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.wait import WebDriverWait
 
 def translate(output_filename):
     while True:
@@ -37,8 +38,6 @@ def translate(output_filename):
             driver = webdriver.Firefox(firefox_profile=profile, options=firefox_options, executable_path=r'C:/WebDrivers/geckodriver.exe')
 
             driver.get("https://www.deepl.com/es/translator/files")
-            from selenium.webdriver.support.wait import WebDriverWait
-                
 
             # Handle cookie banner if it appears
             try:
@@ -67,9 +66,7 @@ def translate(output_filename):
             break # If the element is found, break out of the loop
         except TimeoutException:
             driver.quit() # If the element is not found, refresh the page and try again
-
-        
-        except Exception as e:
+        except Exception:
             driver.quit()
         
 

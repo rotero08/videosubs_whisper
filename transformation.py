@@ -5,11 +5,7 @@ import math
 import moviepy.editor as mp
 import datetime
 import translations
-import subprocess
-import time
 import docx
-
-
 
 class Transformations:
 
