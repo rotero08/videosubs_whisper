@@ -63,7 +63,7 @@ def translate(output_filename):
             translate_button.click()
 
             output_filename = output_filename.replace(".docx" , " es.docx")
-            time.sleep(30)
+            time.sleep(180)
             break # If the element is found, break out of the loop
         except TimeoutException:
             driver.quit() # If the element is not found, refresh the page and try again

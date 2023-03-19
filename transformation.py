@@ -4,7 +4,6 @@ import os
 import math
 import moviepy.editor as mp
 import datetime
-import time
 import translations
 
 
@@ -16,7 +15,8 @@ class Transformations:
 
     @staticmethod
     def extract_audio(video_file: str):
-        audio_file = f'{video_file.replace(".mkv" , "")}.mp3'
+        root_ext = os.path.splitext(video_file)
+        audio_file = f'{video_file.replace(root_ext[1] , "")}.mp3'
         video = mp.VideoFileClip(video_file)
         video.audio.write_audiofile(audio_file)
         return audio_file
@@ -58,11 +58,12 @@ class Transformations:
 
     @staticmethod
     def text_translate(output_filename, language): #########################change
-        output_filename = Transformations.str_to_docx(output_filename, language)
-        output_filename = translations.translate(output_filename)
-        #output_filename = "G:\\1)Descargas\\Universidad Nacional De Bogota\\ICS\\8. Ascent II\\4. Shoot Examples\\Nueva carpeta\\4.1 Biology 1/Biology 1_spanish es.docx"
-        Transformations.docx_to_str(output_filename)
-        Transformations.delete_docx(output_filename)
+        #output_filename = Transformations.str_to_docx(output_filename, language)
+        #output_filename = translations.translate(output_filename)
+        #output_filename = "G:\\1)Descargas\\Universidad Nacional De Bogota\\ICS\\8. Ascent II\\4. Shoot Examples\\Nueva carpeta\\asd\\Biology 1_spanish.docx"
+        #Transformations.docx_to_str(output_filename)
+        #Transformations.delete_docx(output_filename)
+        return
     
     @staticmethod
     def create_srt_file(data, output_filename, language):
@@ -97,8 +98,9 @@ class Transformations:
     
     @staticmethod
     def embedd(video_file: str, subs_files: dict):
-        
-        output_file = f'{video_file.replace(".mkv" , "")}_subs.mkv'
+
+        root_ext = os.path.splitext(video_file)
+        output_file = f'{video_file.replace(root_ext[1] , "")}_subs.mkv'
 
         inputs = {video_file: None}
         outputs = {output_file: '-y -c copy -map 0:v -map 0:a '}
@@ -106,7 +108,7 @@ class Transformations:
         i=0
         for dubs, address in subs_files.items():
             inputs[address] = None
-            outputs[output_file] += f'-map {i+1}:s:0 -metadata:s:s:{i} language={dubs} -metadata:s:s:{i} title={dubs} '
+            outputs[output_file] += f'-map {i+1}:s:0 -metadata:s:s:{i} language={dubs[:min(len(dubs), 3)]} -metadata:s:s:{i} title={dubs} '
             i += 1
         
 
@@ -114,6 +116,16 @@ class Transformations:
 
         ff.run()
         return
+    
+    def delete_srt(subs_files):
+        for file in subs_files.values():
+            os.remove(file)
+
+    def overwrite_video(root_ext):
+        return
+    
+    def delete_video():
+        os.remove()
     
     @staticmethod
     def process_video(parser, video):
@@ -130,4 +142,10 @@ class Transformations:
             print(subs_files)
             Transformations.create_srt_file(segments, address, language)
         
+        if (parser.parse_args().overwrite):
+            Transformations.overwrite_video()
+        
         Transformations.embedd(video, subs_files)
+        
+        if (parser.parse_args().delete):
+            Transformations.delete_srt(subs_files)
