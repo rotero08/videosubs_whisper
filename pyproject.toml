@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "videosubs"
+version = "1.0.0"
+description = "Batch subtitles for a video library: Whisper speech recognition, translation into other languages, and muxing into the file."
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["subtitles", "whisper", "srt", "ffmpeg", "translation", "speech-recognition"]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+  "faster-whisper>=1.1,<2",
+  # faster-whisper 1.2 passes an argument that PyAV 19 removed.
+  "av>=12,<19",
+  "rich>=13",
+]
+
+[project.optional-dependencies]
+# CUDA 12 libraries for NVIDIA GPUs, so no system-wide CUDA install is needed.
+gpu = ["nvidia-cublas-cu12", "nvidia-cudnn-cu12>=9,<10"]
+# Translation through the DeepL API (needs your own API key).
+deepl = ["deepl>=1.18"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6"]
+
+[project.scripts]
+videosubs = "videosubs.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/videosubs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+  "slow: runs the real speech model (set VIDEOSUBS_E2E=1 to include it)",
+  "needs_ffmpeg: needs ffmpeg and ffprobe on the PATH",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+  "RUF001", "RUF002", "RUF003",  # this tool handles Japanese and Chinese punctuation on purpose
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # long literals in fixtures read better unbroken
