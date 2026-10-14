@@ -210,3 +210,8 @@ src/videosubs/
 Credits: [Whisper](https://github.com/openai/whisper) (OpenAI), [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
 and [CTranslate2](https://github.com/OpenNMT/CTranslate2), [NLLB-200](https://github.com/facebookresearch/fairseq/tree/nllb)
 (Meta), [FFmpeg](https://ffmpeg.org/), [Rich](https://github.com/Textualize/rich).
+
+## License
+
+The code is [MIT](LICENSE). The models it downloads are not part of it and keep their own terms: Whisper is MIT, the
+NLLB-200 translation models are **CC-BY-NC-4.0 (non-commercial use only)**, and DeepL is a service with its own conditions.
